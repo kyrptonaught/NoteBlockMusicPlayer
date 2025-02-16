@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "noteblockplayer",
+  "version": "${version}",
+  "name": "NoteBlockPlayer",
+  "description": "",
+  "authors": [
+    "Kyrptonaught"
+  ],
+  "contact": {
+    "repo": "https://github.com/kyrptonaught/NoteBlockPlayer"
+  },
+  "license": "MIT",
+  "icon": "assets/noteblockplayer/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.kyrptonaught.noteblockplayer.NoteBlockPlayer"
+    ]
+  },
+  "depends": {
+  }
+}
