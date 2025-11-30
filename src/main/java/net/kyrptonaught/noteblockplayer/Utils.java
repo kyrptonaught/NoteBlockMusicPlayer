@@ -1,32 +1,31 @@
 package net.kyrptonaught.noteblockplayer;
 
-import net.raphimc.noteblocklib.format.nbs.NbsDefinitions;
-import net.raphimc.noteblocklib.format.nbs.NbsSong;
-import net.raphimc.noteblocklib.util.MinecraftDefinitions;
+import net.raphimc.noteblocklib.data.MinecraftDefinitions;
+import net.raphimc.noteblocklib.data.MinecraftInstrument;
+import net.raphimc.noteblocklib.format.nbs.model.NbsCustomInstrument;
+import net.raphimc.noteblocklib.model.Song;
 import net.raphimc.noteblocklib.util.SongResampler;
-import net.raphimc.noteblocklib.util.SongUtil;
 
 public class Utils {
 
-    public static void preProcessAllNotes(NbsSong song) {
-        SongResampler.applyNbsTempoChangers(song);
-        SongUtil.applyToAllNotes(song.getView(), note -> {
+    public static void preProcessAllNotes(Song song) {
+        SongResampler.precomputeTempoEvents(song);
+        song.getNotes().forEach(note -> {
 
-            String instrument;
-            if (note.getCustomInstrument() == null) {
-                instrument = note.getInstrument().mcSoundName();
-            } else {
-                instrument = note.getCustomInstrument().getName();
-                note.setKey((byte) (note.getKey() + note.getCustomInstrument().getPitch() - 45));
+            String instrument = "";
+            if (note.getInstrument() instanceof MinecraftInstrument mc) {
+                instrument = mc.mcSoundName();
+            }
+            if (note.getInstrument() instanceof NbsCustomInstrument custom) {
+                instrument = custom.getName();
+                note.setNbsKey((byte) (note.getNbsKey() + note.getPitch() - 45));
             }
 
             int shift = MinecraftDefinitions.applyExtendedNotesResourcePack(note);
-            instrument = instrument + (shift != 0 ? shift : "");
+            instrument = instrument + (shift != 0 ? "_" + shift : "");
             instrument = instrument.toLowerCase().replaceAll("[^a-z0-9_.\\-:]", "");
 
-            float pitch = MinecraftDefinitions.nbsPitchToMcPitch(NbsDefinitions.getPitch(note));
-            note.setCustomInstrument(new PreParsedCustomInstrument(instrument, pitch));
+            note.setInstrument(new PreParsedCustomInstrument(instrument, note.getPitch()));
         });
-
     }
 }

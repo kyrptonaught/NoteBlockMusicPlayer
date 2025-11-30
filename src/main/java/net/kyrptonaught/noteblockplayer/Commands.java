@@ -19,9 +19,8 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.raphimc.noteblocklib.NoteBlockLib;
-import net.raphimc.noteblocklib.format.nbs.NbsSong;
+import net.raphimc.noteblocklib.format.nbs.model.NbsSong;
 import net.raphimc.noteblocklib.player.SongPlayer;
-import net.raphimc.noteblocklib.player.SongPlayerCallback;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -57,11 +56,11 @@ public class Commands {
 
                                                     try {
                                                         NbsSong song = getOrLoadSong(songFile);
-                                                        GlobalPlayer player = new GlobalPlayer(songFile, players);
-                                                        player.setLoop(looping, song.getHeader().getLoopStartTick());
-                                                        SongPlayer songPlayer = prepareSong(songFile, song, player);
+                                                        GlobalPlayer player = new GlobalPlayer(song, songFile, players);
+                                                        player.setLoop(looping, song.getLoopStartTick());
+                                                        prepareSong(songFile, player);
 
-                                                        songPlayer.play();
+                                                        player.start();
                                                     } catch (Exception e) {
                                                         e.printStackTrace();
                                                     }
@@ -82,12 +81,12 @@ public class Commands {
 
                                                                             try {
                                                                                 NbsSong song = getOrLoadSong(songFile);
-                                                                                StaticPositionedPlayer player = new StaticPositionedPlayer(songFile, blockPos.toCenterPos(), players);
+                                                                                StaticPositionedPlayer player = new StaticPositionedPlayer(song, songFile, blockPos.toCenterPos(), players);
                                                                                 player.setDistanceFade(distance, fade);
-                                                                                player.setLoop(looping, song.getHeader().getLoopStartTick());
-                                                                                SongPlayer songPlayer = prepareSong(songFile, song, player);
+                                                                                player.setLoop(looping, song.getLoopStartTick());
+                                                                                prepareSong(songFile, player);
 
-                                                                                songPlayer.play();
+                                                                                player.start();
                                                                             } catch (Exception e) {
                                                                                 e.printStackTrace();
                                                                             }
@@ -109,12 +108,12 @@ public class Commands {
 
                                                                             try {
                                                                                 NbsSong song = getOrLoadSong(songFile);
-                                                                                DynamicPositionedPlayer player = new DynamicPositionedPlayer(songFile, entity::getPos, players);
+                                                                                DynamicPositionedPlayer player = new DynamicPositionedPlayer(song, songFile, entity::getEntityPos, players);
                                                                                 player.setDistanceFade(distance, fade);
-                                                                                player.setLoop(looping, song.getHeader().getLoopStartTick());
-                                                                                SongPlayer songPlayer = prepareSong(songFile, song, player);
+                                                                                player.setLoop(looping, song.getLoopStartTick());
+                                                                                prepareSong(songFile, player);
 
-                                                                                songPlayer.play();
+                                                                                player.start();
                                                                             } catch (Exception e) {
                                                                                 e.printStackTrace();
                                                                             }
@@ -194,11 +193,10 @@ public class Commands {
         return null;
     }
 
-    private static SongPlayer prepareSong(String songFile, NbsSong song, SongPlayerCallback player) {
-        SongPlayer songPlayer = new SongPlayer(song.getView(), player);
+    private static SongPlayer prepareSong(String songFile, SongPlayer player) {
         if (songPlayers.containsKey(songFile)) songPlayers.remove(songFile).stop();
-        songPlayers.put(songFile, songPlayer);
-        return songPlayer;
+        songPlayers.put(songFile, player);
+        return player;
     }
 
     private static CompletableFuture<Suggestions> getAvailableNBSFiles(CommandContext<ServerCommandSource> context, final SuggestionsBuilder builder) {

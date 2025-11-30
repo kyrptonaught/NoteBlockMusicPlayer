@@ -3,6 +3,7 @@ package net.kyrptonaught.noteblockplayer.players;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Vec3d;
+import net.raphimc.noteblocklib.model.Song;
 
 import java.util.Collection;
 
@@ -11,8 +12,8 @@ public class PositionedPlayer extends Player {
     protected int distance;
     protected boolean fade;
 
-    public PositionedPlayer(String name, Collection<ServerPlayerEntity> players) {
-        super(name, players);
+    public PositionedPlayer(Song song, String name, Collection<ServerPlayerEntity> players) {
+        super(song, name, players);
 
     }
 
@@ -22,6 +23,6 @@ public class PositionedPlayer extends Player {
     }
 
     public boolean isInRange(PlayerEntity player, Vec3d pos) {
-        return player.getPos().isInRange(pos, distance);
+        return player.getEntityPos().isInRange(pos, distance);
     }
 }

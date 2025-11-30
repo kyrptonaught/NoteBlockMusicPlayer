@@ -11,7 +11,7 @@ public class PreParsedCustomInstrument extends NbsCustomInstrument {
     private final RegistryEntry<SoundEvent> soundEvent;
 
     public PreParsedCustomInstrument(String name, float parsedPitch) {
-        super(null, null, (byte) 0, false);
+        super();
         this.soundEvent = Registries.SOUND_EVENT.getEntry(SoundEvent.of(Identifier.of(name)));
         this.parsedPitch = parsedPitch;
     }

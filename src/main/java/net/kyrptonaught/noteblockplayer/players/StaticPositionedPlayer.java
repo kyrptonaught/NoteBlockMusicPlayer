@@ -6,6 +6,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.Vec3d;
+import net.raphimc.noteblocklib.model.Song;
 
 import java.util.Collection;
 
@@ -13,8 +14,8 @@ public class StaticPositionedPlayer extends PositionedPlayer {
 
     private final Vec3d pos;
 
-    public StaticPositionedPlayer(String name, Vec3d pos, Collection<ServerPlayerEntity> players) {
-        super(name, players);
+    public StaticPositionedPlayer(Song song, String name, Vec3d pos, Collection<ServerPlayerEntity> players) {
+        super(song, name, players);
         this.pos = pos;
     }
 
@@ -23,7 +24,7 @@ public class StaticPositionedPlayer extends PositionedPlayer {
         for (ServerPlayerEntity player : players) {
             if (isInRange(player, pos)) {
                 Vec3d playPos = pos;
-                if (!fade) playPos = player.getPos();
+                if (!fade) playPos = player.getEntityPos();
                 player.networkHandler.sendPacket(new PlaySoundS2CPacket(soundEvent, SoundCategory.RECORDS, playPos.getX(), playPos.getY(), playPos.getZ(), volume, pitch, player.getRandom().nextLong()));
             }
         }

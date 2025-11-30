@@ -5,20 +5,22 @@ import net.kyrptonaught.noteblockplayer.PreParsedCustomInstrument;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvent;
-import net.raphimc.noteblocklib.format.nbs.model.NbsNote;
 import net.raphimc.noteblocklib.model.Note;
-import net.raphimc.noteblocklib.player.SongPlayerCallback;
+import net.raphimc.noteblocklib.model.Song;
+import net.raphimc.noteblocklib.player.SongPlayer;
 
 import java.util.Collection;
+import java.util.List;
 
-public class Player implements SongPlayerCallback {
+public class Player extends SongPlayer {
 
     protected final String name;
     protected final Collection<ServerPlayerEntity> players;
     protected boolean loop;
     protected int loopTick;
 
-    public Player(String name, Collection<ServerPlayerEntity> players) {
+    public Player(Song song, String name, Collection<ServerPlayerEntity> players) {
+        super(song);
         this.name = name;
         this.players = players;
     }
@@ -29,33 +31,25 @@ public class Player implements SongPlayerCallback {
     }
 
     @Override
-    public void playNote(Note note) {
-        if (note instanceof NbsNote nbsNote) {
-            final float volume = nbsNote.getVolume() / 100f;
-            if (volume <= 0) return;
+    protected void playNotes(List<Note> notes) {
+        for (Note note : notes) playNote(note);
+    }
 
-            if (nbsNote.getCustomInstrument() instanceof PreParsedCustomInstrument parsed) {
-                playNote(parsed.getInstrument(), parsed.getParsedPitch(), volume);
-            }
+    public void playNote(Note note) {
+        if (note.getInstrument() instanceof PreParsedCustomInstrument nbsNote) {
+            playNote(nbsNote.getInstrument(), nbsNote.getParsedPitch(), note.getVolume());
         }
     }
 
     public void playNote(RegistryEntry<SoundEvent> soundEvent, float pitch, float volume) {
-
     }
 
     @Override
-    public boolean shouldLoop() {
-        return loop;
-    }
-
-    @Override
-    public int getLoopDelay() {
-        return -loopTick;
-    }
-
-    @Override
-    public void onFinished() {
-        Commands.stopSong(this.name);
+    protected void onSongFinished() {
+        super.onSongFinished();
+        if (loop)
+            start(0, loopTick);
+        else
+            Commands.stopSong(this.name);
     }
 }
